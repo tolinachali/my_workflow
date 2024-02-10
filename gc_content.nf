@@ -1,17 +1,20 @@
+params.inputFile = "/mnt/c/Users/HP/_repos/my_research/my_workflow/miRNA_test.fa"
+
 process calculateGCContent {
     input:
-    file dnaSequence
+    file(inputFile) from params.inputFile
 
     output:
-    file 'gc_content.txt'
+    file("gc_content.txt") into gcContent
 
     script:
     """
-    java -cp . GCContentCalculator ${dnaSequence} > gc_content.txt
+    java GCContentCalculator ${inputFile}
     """
 }
 
 workflow {
-    calculateGCContent('C:/Users/HP/_repos/my_research/input.txt')
+    calculateGCContent
 }
+
 
