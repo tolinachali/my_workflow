@@ -1,63 +1,48 @@
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class GCContentCalculator {
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Usage: java GCContentCalculator <path_to_fasta_file>");
-            System.exit(1);
-        }
 
-        String fastaFilePath = args[0];
+    public static void main(String[] args) {
+        String filename = "/mnt/c/Users/HP/_repos/my_research/my_workflow/miRNA_test.fa"; // Path to your FASTA file
+        
         try {
-            double gcContent = calculateGCContent(fastaFilePath);
-            System.out.println("GC content of the FASTA file is: " + gcContent + "%");
+            double totalGCContent = calculateGCContent(filename);
+            System.out.println("Total GC content: " + totalGCContent + "%");
         } catch (IOException e) {
-            System.err.println("Error reading the FASTA file: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            System.err.println("Error calculating GC content: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    public static double calculateGCContent(String fastaFilePath) throws IOException {
-        int totalBases = 0;
+    public static double calculateGCContent(String filename) throws IOException {
+        int totalNucleotides = 0;
         int gcCount = 0;
 
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(fastaFilePath))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
-            boolean headerLine = true;
-
-            while ((line = reader.readLine()) != null) {
-                if (headerLine) {
-                    headerLine = false;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith(">")) { // Skip header lines
                     continue;
                 }
-
-                for (char base : line.toCharArray()) {
-                    if (isValidBase(base)) {
-                        if (base == 'G' || base == 'C' || base == 'g' || base == 'c') {
-                            gcCount++;
-                        }
-                        totalBases++;
-                    } else {
-                        throw new IllegalArgumentException("Invalid character in the FASTA file: " + base);
-                    }
-                }
+                // Count nucleotides
+                totalNucleotides += line.length();
+                gcCount += countGC(line);
             }
         }
 
-        if (totalBases == 0) {
-            throw new IllegalArgumentException("FASTA file is empty or in an incorrect format.");
-        }
-
-        return (double) gcCount / totalBases * 100.0;
+        // Calculate GC content
+        return (double) gcCount / totalNucleotides * 100;
     }
 
-    private static boolean isValidBase(char base) {
-        return base == 'A' || base == 'C' || base == 'G' || base == 'T' || base == 'a' || base == 'c' || base == 'g' || base == 't';
+    public static int countGC(String sequence) {
+        int count = 0;
+        for (char nucleotide : sequence.toCharArray()) {
+            if (nucleotide == 'G' || nucleotide == 'C') {
+                count++;
+            }
+        }
+        return count;
     }
 }
 
