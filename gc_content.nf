@@ -1,20 +1,21 @@
-params.inputFile = "/mnt/c/Users/HP/_repos/my_research/my_workflow/miRNA_test.fa"
+#!/usr/bin/env nextflow
+
+params.inputFasta = './input.fasta'
 
 process calculateGCContent {
     input:
-    file(inputFile) from params.inputFile
+    file(inputFasta) from params.inputFasta
 
     output:
-    file("gc_content.txt") into gcContent
+    file 'gc_content.txt'
 
     script:
     """
-    java GCContentCalculator ${inputFile}
+    java GCContentCalculator ${inputFasta} > gc_content.txt
     """
 }
 
 workflow {
     calculateGCContent
 }
-
 
